@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Vendocine</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-database-compat.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>💊 Vendocine</h2>
+                <p>Admin Panel</p>
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li><a href="#" onclick="showSection('overview')" class="active">📊 Overview</a></li>
+                <li><a href="#" onclick="showSection('register-teacher')">👨‍🏫 Register Teacher</a></li>
+                <li><a href="#" onclick="showSection('manage-students')">👥 Manage Students</a></li>
+                <li><a href="#" onclick="showSection('view-claims')">📋 View Claims</a></li>
+                <li><a href="#" onclick="showSection('system-settings')">⚙️ System Settings</a></li>
+                <li><a href="#" onclick="logout()" class="logout-btn">🚪 Logout</a></li>
+            </ul>
+            
+            <div class="user-info">
+                <div class="user-avatar">A</div>
+                <div>
+                    <p id="admin-name">Administrator</p>
+                    <p id="admin-email" class="small-text">admin@vendocine.com</p>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <h1 id="page-title">Admin Dashboard</h1>
+                <div class="header-actions">
+                    <span id="current-time"></span>
+                </div>
+            </header>
+            
+            <!-- Overview Section -->
+            <section id="overview" class="content-section">
+                <h2>📊 System Overview</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Students</h3>
+                        <p id="total-students" class="stat-number">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Teachers</h3>
+                        <p id="total-teachers" class="stat-number">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Active Classes</h3>
+                        <p id="total-classes" class="stat-number">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Today's Claims</h3>
+                        <p id="today-claims" class="stat-number">0</p>
+                    </div>
+                </div>
+                
+                <div class="recent-activity">
+                    <h3>Recent Activity</h3>
+                    <div id="recent-activity-list" class="activity-list"></div>
+                </div>
+            </section>
+            
+            <!-- Register Teacher Section -->
+            <section id="register-teacher" class="content-section" style="display: none;">
+                <h2>👨‍🏫 Register New Teacher</h2>
+                
+                <div class="form-card">
+                    <form id="teacher-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" id="teacher-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email Address</label>
+                                <input type="email" id="teacher-email" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Phone Number</label>
+                                <input type="tel" id="teacher-phone">
+                            </div>
+                            <div class="form-group">
+                                <label>Employee ID</label>
+                                <input type="text" id="teacher-employee-id">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Assigned Class</label>
+                            <input type="text" id="teacher-class" placeholder="e.g., Grade 10-A" required>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary">Register Teacher</button>
+                    </form>
+                    
+                    <div id="teacher-result" class="result-message"></div>
+                </div>
+                
+                <div class="teachers-list">
+                    <h3>Registered Teachers</h3>
+                    <div id="teachers-table" class="data-table"></div>
+                </div>
+            </section>
+            
+            <!-- Manage Students Section -->
+            <section id="manage-students" class="content-section" style="display: none;">
+                <h2>👥 Manage Students</h2>
+                
+                <div class="search-box">
+                    <input type="text" id="search-students" placeholder="Search students by name, email, or class...">
+                    <button onclick="searchStudents()" class="btn-secondary">Search</button>
+                </div>
+                
+                <div id="students-table" class="data-table">
+                    <div class="table-header">
+                        <div>Name</div>
+                        <div>Class</div>
+                        <div>Email</div>
+                        <div>Pills Left</div>
+                        <div>Actions</div>
+                    </div>
+                    <div id="students-list"></div>
+                </div>
+            </section>
+            
+            <!-- View Claims Section -->
+            <section id="view-claims" class="content-section" style="display: none;">
+                <h2>📋 Medication Claims</h2>
+                
+                <div class="filters">
+                    <select id="claim-filter">
+                        <option value="all">All Claims</option>
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                    </select>
+                </div>
+                
+                <div id="claims-table" class="data-table">
+                    <div class="table-header">
+                        <div>Student</div>
+                        <div>Class</div>
+                        <div>Time</div>
+                        <div>Pills Left</div>
+                    </div>
+                    <div id="claims-list"></div>
+                </div>
+            </section>
+            
+            <!-- System Settings Section -->
+            <section id="system-settings" class="content-section" style="display: none;">
+                <h2>⚙️ System Settings</h2>
+                
+                <div class="settings-card">
+                    <div class="setting-item">
+                        <h3>Monthly Pill Limit</h3>
+                        <input type="number" id="pill-limit" min="1" max="30" value="5">
+                        <button onclick="updatePillLimit()" class="btn-small">Update</button>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <h3>System Maintenance</h3>
+                        <label class="switch">
+                            <input type="checkbox" id="maintenance-mode">
+                            <span class="slider"></span>
+                        </label>
+                        <span id="maintenance-status">System is operational</span>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <h3>Reset Monthly Claims</h3>
+                        <p>Reset all student pill counts for new month</p>
+                        <button onclick="resetMonthlyClaims()" class="btn-danger">Reset All Claims</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <script src="js/firebase-config.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
+<!-- Add to sidebar menu -->
+<li><a href="#" onclick="showSection('user-credentials')">🔐 User Credentials</a></li>
+
+<!-- Add new section in main content -->
+<section id="user-credentials" class="content-section" style="display: none;">
+    <h2>🔐 User Credentials Management</h2>
+    
+    <div class="search-box">
+        <input type="text" id="search-credentials" placeholder="Search users...">
+        <button onclick="searchCredentials()" class="btn-secondary">Search</button>
+    </div>
+    
+    <div class="credential-filters">
+        <button onclick="filterByRole('all')" class="btn-small">All</button>
+        <button onclick="filterByRole('admin')" class="btn-small">Admins</button>
+        <button onclick="filterByRole('teacher')" class="btn-small">Teachers</button>
+        <button onclick="filterByRole('student')" class="btn-small">Students</button>
+    </div>
+    
+    <div id="credentials-table" class="data-table">
+        <div class="table-header">
+            <div>Name</div>
+            <div>Email</div>
+            <div>Role</div>
+            <div>Class</div>
+            <div>Password</div>
+            <div>Actions</div>
+        </div>
+        <div id="credentials-list"></div>
+    </div>
+    
+    <div class="export-options">
+        <button onclick="exportCredentialsCSV()" class="btn-secondary">📊 Export to CSV</button>
+        <button onclick="printCredentials()" class="btn-secondary">🖨️ Print List</button>
+    </div>
+</section>

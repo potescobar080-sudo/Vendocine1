@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - Vendocine</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-database-compat.js"></script>
+</head>
+<body>
+    <div class="dashboard-container student">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>💊 Vendocine</h2>
+                <p>Student Panel</p>
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li><a href="#" onclick="showSection('my-profile')" class="active">👤 My Profile</a></li>
+                <li><a href="#" onclick="showSection('my-claims')">📋 My Claims</a></li>
+                <li><a href="#" onclick="showSection('my-barcode')">📄 My Barcode</a></li>
+                <li><a href="#" onclick="logout()" class="logout-btn">🚪 Logout</a></li>
+            </ul>
+            
+            <div class="user-info">
+                <div class="user-avatar">S</div>
+                <div>
+                    <p id="student-name">Student Name</p>
+                    <p id="student-class" class="small-text">Class: Loading...</p>
+                </div>
+            </div>
+        </nav>
+        
+        <main class="main-content">
+            <header class="main-header">
+                <h1 id="page-title">Student Dashboard</h1>
+                <div class="header-stats">
+                    <div class="pill-counter">
+                        <span class="pill-label">Pills Remaining:</span>
+                        <span id="pills-remaining" class="pill-count">5/5</span>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- My Profile Section -->
+            <section id="my-profile" class="content-section">
+                <h2>👤 My Information</h2>
+                
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="profile-avatar">S</div>
+                        <div class="profile-name">
+                            <h3 id="profile-name">Loading...</h3>
+                            <p id="profile-class">Class: Loading...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Email:</span>
+                            <span id="profile-email" class="detail-value">Loading...</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">LRN:</span>
+                            <span id="profile-lrn" class="detail-value">Loading...</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Age:</span>
+                            <span id="profile-age" class="detail-value">Loading...</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Gender:</span>
+                            <span id="profile-gender" class="detail-value">Loading...</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Birth Date:</span>
+                            <span id="profile-birthdate" class="detail-value">Loading...</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Teacher:</span>
+                            <span id="profile-teacher" class="detail-value">Loading...</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Parent Contact:</span>
+                            <span id="profile-parent" class="detail-value">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="medication-info">
+                    <h3>💊 Medication Information</h3>
+                    <div class="pill-visual" id="pill-visual">
+                        <!-- Pills will be generated here -->
+                    </div>
+                    <div class="medication-details">
+                        <p><strong>Monthly Limit:</strong> 5 pills per month</p>
+                        <p><strong>Reset Date:</strong> 1st of every month</p>
+                        <p><strong>Last Claim:</strong> <span id="last-claim">Never</span></p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- My Claims Section -->
+            <section id="my-claims" class="content-section" style="display: none;">
+                <h2>📋 My Claim History</h2>
+                
+                <div class="claims-summary">
+                    <div class="summary-card">
+                        <h4>This Month</h4>
+                        <p id="month-claims">0 claims</p>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Total Claims</h4>
+                        <p id="total-claims">0 claims</p>
+                    </div>
+                </div>
+                
+                <div id="my-claims-table" class="data-table">
+                    <div class="table-header">
+                        <div>Date & Time</div>
+                        <div>Pills Before</div>
+                        <div>Pills After</div>
+                    </div>
+                    <div id="my-claims-list"></div>
+                </div>
+            </section>
+            
+            <!-- My Barcode Section -->
+            <section id="my-barcode" class="content-section" style="display: none;">
+                <h2>📄 My Barcode Card</h2>
+                <p>Show this barcode to claim medication</p>
+                
+                <div class="barcode-card-large">
+                    <div class="barcode-header">
+                        <h3 id="barcode-name">Student Name</h3>
+                        <p id="barcode-class">Class: Loading...</p>
+                    </div>
+                    
+                    <div class="barcode-main">
+                        <img id="barcode-image" src="" alt="Barcode" class="barcode-large">
+                        <div class="barcode-info">
+                            <p><strong>Barcode ID:</strong> <span id="barcode-id">Loading...</span></p>
+                            <p><strong>LRN:</strong> <span id="barcode-lrn">Loading...</span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="barcode-instructions">
+                        <h4>📋 Instructions:</h4>
+                        <ol>
+                            <li>Take this barcode to the Vendocine machine</li>
+                            <li>Scan the barcode to claim medication</li>
+                            <li>You can claim up to 5 pills per month</li>
+                            <li>Contact your teacher if barcode doesn't work</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="barcode-actions">
+                        <button onclick="printBarcode()" class="btn-primary">🖨️ Print Barcode</button>
+                        <button onclick="downloadBarcode()" class="btn-secondary">📥 Download Barcode</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <script src="js/firebase-config.js"></script>
+    <script src="js/student.js"></script>
+</body>
+</html>

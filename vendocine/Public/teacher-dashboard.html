@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - Vendocine</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-database-compat.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>💊 Vendocine</h2>
+                <p>Teacher Panel</p>
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li><a href="#" onclick="showSection('my-students')" class="active">👥 My Students</a></li>
+                <li><a href="#" onclick="showSection('register-student')">➕ Register Student</a></li>
+                <li><a href="#" onclick="showSection('class-claims')">📋 Class Claims</a></li>
+                <li><a href="#" onclick="showSection('barcodes')">📄 Generate Barcodes</a></li>
+                <li><a href="#" onclick="logout()" class="logout-btn">🚪 Logout</a></li>
+            </ul>
+            
+            <div class="user-info">
+                <div class="user-avatar">T</div>
+                <div>
+                    <p id="teacher-name">Teacher Name</p>
+                    <p id="teacher-class" class="small-text">Class: Loading...</p>
+                </div>
+            </div>
+        </nav>
+        
+        <main class="main-content">
+            <header class="main-header">
+                <h1 id="page-title">Teacher Dashboard</h1>
+                <div id="teacher-stats" class="header-stats">
+                    <span>Students: <span id="student-count">0</span></span>
+                    <span>Claims Today: <span id="today-claims">0</span></span>
+                </div>
+            </header>
+            
+            <!-- My Students Section -->
+            <section id="my-students" class="content-section">
+                <h2>👥 My Students</h2>
+                
+                <div class="search-box">
+                    <input type="text" id="search-my-students" placeholder="Search students...">
+                    <button onclick="searchMyStudents()" class="btn-secondary">Search</button>
+                </div>
+                
+                <div id="my-students-table" class="data-table">
+                    <div class="table-header">
+                        <div>Name</div>
+                        <div>LRN</div>
+                        <div>Barcode ID</div>
+                        <div>Pills Left</div>
+                        <div>Last Claim</div>
+                        <div>Actions</div>
+                    </div>
+                    <div id="my-students-list"></div>
+                </div>
+            </section>
+            
+            <!-- Register Student Section -->
+            <section id="register-student" class="content-section" style="display: none;">
+                <h2>➕ Register New Student</h2>
+                
+                <div class="form-card">
+                    <form id="student-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Full Name *</label>
+                                <input type="text" id="student-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email Address *</label>
+                                <input type="email" id="student-email" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>LRN (Learner Reference Number) *</label>
+                                <input type="text" id="student-lrn" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Age</label>
+                                <input type="number" id="student-age" min="5" max="25">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Gender</label>
+                                <select id="student-gender">
+                                    <option value="">Select</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Birth Date</label>
+                                <input type="date" id="student-birthdate">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Barcode ID *</label>
+                            <div class="barcode-input">
+                                <input type="text" id="student-barcode" required>
+                                <button type="button" onclick="generateBarcode()" class="btn-small">Generate</button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Parent Contact</label>
+                            <input type="tel" id="parent-contact" placeholder="+63 912 345 6789">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Medical Notes</label>
+                            <textarea id="medical-notes" rows="3"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary">Register Student</button>
+                    </form>
+                    
+                    <div id="student-result" class="result-message"></div>
+                </div>
+            </section>
+            
+            <!-- Class Claims Section -->
+            <section id="class-claims" class="content-section" style="display: none;">
+                <h2>📋 Class Claims History</h2>
+                
+                <div class="filters">
+                    <select id="class-claim-filter">
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="all">All Time</option>
+                    </select>
+                </div>
+                
+                <div id="class-claims-table" class="data-table">
+                    <div class="table-header">
+                        <div>Student</div>
+                        <div>Time</div>
+                        <div>Pills Left</div>
+                    </div>
+                    <div id="class-claims-list"></div>
+                </div>
+            </section>
+            
+            <!-- Barcodes Section -->
+            <section id="barcodes" class="content-section" style="display: none;">
+                <h2>📄 Student Barcodes</h2>
+                <p>Print barcodes for your students</p>
+                
+                <div id="barcode-list" class="barcode-grid"></div>
+                
+                <div class="print-controls">
+                    <button onclick="printAllBarcodes()" class="btn-primary">🖨️ Print All Barcodes</button>
+                    <button onclick="downloadBarcodes()" class="btn-secondary">📥 Download as PDF</button>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <script src="js/firebase-config.js"></script>
+    <script src="js/teacher.js"></script>
+</body>
+</html>
